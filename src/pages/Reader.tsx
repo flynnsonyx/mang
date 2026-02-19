@@ -1,9 +1,10 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, ChevronLeft, List, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { mangaList } from "@/data/manga";
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 // Generate placeholder reader pages
 const readerPages = [
@@ -20,6 +21,14 @@ const Reader = () => {
   const manga = mangaList.find((m) => m.id === id);
   const [currentPage, setCurrentPage] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const { markAsRead } = useReadingHistory();
+
+  // Mark chapter as read when entering the reader
+  useEffect(() => {
+    if (id && chapterId) {
+      markAsRead(id, Number(chapterId));
+    }
+  }, [id, chapterId, markAsRead]);
 
   if (!manga) {
     return (
