@@ -1,13 +1,16 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Star, Eye, BookOpen, Clock, User, ArrowLeft } from "lucide-react";
+import { Star, Eye, BookOpen, Clock, User, ArrowLeft, CheckCircle2 } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { mangaList, getChapters } from "@/data/manga";
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 const MangaDetail = () => {
   const { id } = useParams();
   const manga = mangaList.find((m) => m.id === id);
   const chapters = id ? getChapters(id) : [];
+  const { isRead, getLastRead } = useReadingHistory();
+  const lastRead = id ? getLastRead(id) : undefined;
 
   if (!manga) {
     return (
@@ -108,13 +111,24 @@ const MangaDetail = () => {
                 {manga.description}
               </p>
 
-              <Link
-                to={`/manga/${manga.id}/read/1`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm glow-md hover:glow-lg transition-all duration-300 hover:scale-105"
-              >
-                <BookOpen className="w-4 h-4" />
-                Start Reading
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to={`/manga/${manga.id}/read/1`}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm glow-md hover:glow-lg transition-all duration-300 hover:scale-105"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Start Reading
+                </Link>
+                {lastRead && (
+                  <Link
+                    to={`/manga/${manga.id}/read/${lastRead.chapterId}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary text-foreground font-semibold text-sm hover:bg-secondary/80 transition-all duration-300 hover:scale-105 border border-border/50"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Continue Ch. {lastRead.chapterId}
+                  </Link>
+                )}
+              </div>
             </motion.div>
           </div>
 
@@ -136,11 +150,20 @@ const MangaDetail = () => {
                 >
                   <Link
                     to={`/manga/${manga.id}/read/${ch.id}`}
-                    className="flex items-center justify-between px-4 py-3 rounded-lg glass-hover group"
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg glass-hover group ${
+                      id && isRead(id, ch.id) ? "bg-primary/5 border border-primary/10" : ""
+                    }`}
                   >
-                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      {ch.title}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {id && isRead(id, ch.id) && (
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                      )}
+                      <span className={`text-sm font-medium transition-colors group-hover:text-primary ${
+                        id && isRead(id, ch.id) ? "text-primary/70" : "text-foreground"
+                      }`}>
+                        {ch.title}
+                      </span>
+                    </div>
                     <span className="text-xs text-muted-foreground">{ch.date}</span>
                   </Link>
                 </motion.div>
