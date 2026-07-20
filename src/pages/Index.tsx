@@ -1,14 +1,32 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Play, BookOpen, TrendingUp } from "lucide-react";
+import { Play, BookOpen, TrendingUp, Clock, Sparkles } from "lucide-react";
 import MangaCard from "@/components/MangaCard";
 import PageTransition from "@/components/PageTransition";
 import { mangaList } from "@/data/manga";
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 const Index = () => {
   const featured = mangaList[0];
-  const trending = mangaList.slice(0, 4);
-  const popular = mangaList.slice(2, 8);
+  const trending = [...mangaList].sort((a, b) => b.popularity - a.popularity).slice(0, 4);
+  const popular = [...mangaList].sort((a, b) => b.rating - a.rating).slice(0, 6);
+  const recentlyUpdated = [...mangaList]
+    .filter((m) => m.status === "Ongoing")
+    .sort((a, b) => a.updatedDaysAgo - b.updatedDaysAgo)
+    .slice(0, 6);
+
+  const { getRecentlyRead } = useReadingHistory();
+  const recent = getRecentlyRead(1)[0];
+  const recentManga = recent ? mangaList.find((m) => m.id === recent.mangaId) : null;
+  const recs = recentManga
+    ? mangaList
+        .filter(
+          (m) =>
+            m.id !== recentManga.id &&
+            m.genres.some((g) => recentManga.genres.includes(g))
+        )
+        .slice(0, 6)
+    : [];
 
   return (
     <PageTransition>
@@ -50,14 +68,15 @@ const Index = () => {
                 {featured.description}
               </p>
 
-              <div className="flex items-center gap-3 mb-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 mb-6 text-sm text-muted-foreground flex-wrap">
                 {featured.genres.map((g) => (
-                  <span
+                  <Link
                     key={g}
-                    className="px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
+                    to={`/genre/${encodeURIComponent(g)}`}
+                    className="px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground hover:bg-primary/20 hover:text-primary transition-colors"
                   >
                     {g}
-                  </span>
+                  </Link>
                 ))}
               </div>
 
@@ -80,6 +99,30 @@ const Index = () => {
             </motion.div>
           </div>
         </section>
+
+        {/* Recommendations */}
+        {recentManga && recs.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-display font-bold flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <span className="gradient-text">Because you read {recentManga.title}</span>
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {recs.map((m, i) => (
+                  <MangaCard key={m.id} manga={m} index={i} />
+                ))}
+              </div>
+            </motion.div>
+          </section>
+        )}
 
         {/* Trending Section */}
         <section className="container mx-auto px-4 py-12">
@@ -109,6 +152,35 @@ const Index = () => {
           </motion.div>
         </section>
 
+        {/* Recently Updated */}
+        <section className="container mx-auto px-4 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-display font-bold flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary" />
+                <span className="gradient-text">Recently Updated</span>
+              </h2>
+              <Link
+                to="/browse"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                View All →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {recentlyUpdated.map((manga, i) => (
+                <MangaCard key={manga.id} manga={manga} index={i} />
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
         {/* Popular Section */}
         <section className="container mx-auto px-4 py-12">
           <motion.div
@@ -119,7 +191,7 @@ const Index = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-display font-bold">
-                <span className="gradient-text">Popular Series</span>
+                <span className="gradient-text">Top Rated</span>
               </h2>
               <Link
                 to="/browse"
@@ -137,7 +209,6 @@ const Index = () => {
           </motion.div>
         </section>
 
-        {/* Footer */}
         <footer className="border-t border-border/30 py-8">
           <div className="container mx-auto px-4 text-center">
             <span className="text-sm text-muted-foreground">

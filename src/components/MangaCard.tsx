@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star, Eye } from "lucide-react";
 import type { Manga } from "@/data/manga";
+import BookmarkButton from "@/components/BookmarkButton";
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 interface MangaCardProps {
   manga: Manga;
@@ -9,11 +11,14 @@ interface MangaCardProps {
 }
 
 const MangaCard = ({ manga, index = 0 }: MangaCardProps) => {
+  const { getLastRead } = useReadingHistory();
+  const lastRead = getLastRead(manga.id);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.08 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
       whileHover={{ y: -8, scale: 1.02 }}
       className="group"
     >
@@ -29,6 +34,10 @@ const MangaCard = ({ manga, index = 0 }: MangaCardProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
           </div>
 
+          <div className="absolute top-3 left-3">
+            <BookmarkButton mangaId={manga.id} />
+          </div>
+
           <div className="absolute top-3 right-3">
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -40,6 +49,14 @@ const MangaCard = ({ manga, index = 0 }: MangaCardProps) => {
               {manga.status}
             </span>
           </div>
+
+          {lastRead && (
+            <div className="absolute bottom-[68px] left-3 right-3">
+              <div className="px-2 py-1 rounded-md bg-background/70 backdrop-blur-md text-[10px] text-primary font-medium border border-primary/30">
+                Continue Ch. {lastRead.chapterId}
+              </div>
+            </div>
+          )}
 
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <h3 className="font-display font-bold text-foreground text-sm leading-tight mb-1 line-clamp-2">
