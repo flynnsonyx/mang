@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star, Eye, BookOpen, Clock, User, ArrowLeft, CheckCircle2 } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import BookmarkButton from "@/components/BookmarkButton";
 import { mangaList, getChapters } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 
@@ -9,7 +10,7 @@ const MangaDetail = () => {
   const { id } = useParams();
   const manga = mangaList.find((m) => m.id === id);
   const chapters = id ? getChapters(id) : [];
-  const { isRead, getLastRead } = useReadingHistory();
+  const { isRead, getLastRead, getEntry } = useReadingHistory();
   const lastRead = id ? getLastRead(id) : undefined;
 
   if (!manga) {
@@ -23,7 +24,6 @@ const MangaDetail = () => {
   return (
     <PageTransition>
       <div className="min-h-screen pt-16">
-        {/* Banner */}
         <div className="relative h-72 overflow-hidden">
           <img
             src={manga.cover}
@@ -43,7 +43,6 @@ const MangaDetail = () => {
           </Link>
 
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Cover */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -58,7 +57,6 @@ const MangaDetail = () => {
               </div>
             </motion.div>
 
-            {/* Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -89,12 +87,13 @@ const MangaDetail = () => {
 
               <div className="flex flex-wrap gap-2 mb-4">
                 {manga.genres.map((g) => (
-                  <span
+                  <Link
                     key={g}
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary border border-primary/20"
+                    to={`/genre/${encodeURIComponent(g)}`}
+                    className="px-3 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary border border-primary/20 hover:bg-primary/25 transition-colors"
                   >
                     {g}
-                  </span>
+                  </Link>
                 ))}
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -111,7 +110,7 @@ const MangaDetail = () => {
                 {manga.description}
               </p>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 items-center">
                 <Link
                   to={`/manga/${manga.id}/read/1`}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm glow-md hover:glow-lg transition-all duration-300 hover:scale-105"
@@ -128,11 +127,11 @@ const MangaDetail = () => {
                     Continue Ch. {lastRead.chapterId}
                   </Link>
                 )}
+                <BookmarkButton mangaId={manga.id} size="lg" showLabel />
               </div>
             </motion.div>
           </div>
 
-          {/* Chapters */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -141,33 +140,51 @@ const MangaDetail = () => {
           >
             <h2 className="text-xl font-display font-bold mb-4">Chapters</h2>
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-              {chapters.map((ch, i) => (
-                <motion.div
-                  key={ch.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.03 }}
-                >
-                  <Link
-                    to={`/manga/${manga.id}/read/${ch.id}`}
-                    className={`flex items-center justify-between px-4 py-3 rounded-lg glass-hover group ${
-                      id && isRead(id, ch.id) ? "bg-primary/5 border border-primary/10" : ""
-                    }`}
+              {chapters.map((ch, i) => {
+                const entry = id ? getEntry(id, ch.id) : undefined;
+                const read = id ? isRead(id, ch.id) : false;
+                const progress =
+                  entry?.lastPage !== undefined && entry?.totalPages
+                    ? Math.round(((entry.lastPage + 1) / entry.totalPages) * 100)
+                    : null;
+                return (
+                  <motion.div
+                    key={ch.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + Math.min(i * 0.02, 0.3) }}
                   >
-                    <div className="flex items-center gap-2">
-                      {id && isRead(id, ch.id) && (
-                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                      )}
-                      <span className={`text-sm font-medium transition-colors group-hover:text-primary ${
-                        id && isRead(id, ch.id) ? "text-primary/70" : "text-foreground"
-                      }`}>
-                        {ch.title}
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{ch.date}</span>
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      to={`/manga/${manga.id}/read/${ch.id}`}
+                      className={`flex items-center justify-between px-4 py-3 rounded-lg glass-hover group ${
+                        read ? "bg-primary/5 border border-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        {read && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
+                        <div className="min-w-0 flex-1">
+                          <span
+                            className={`text-sm font-medium transition-colors group-hover:text-primary ${
+                              read ? "text-primary/70" : "text-foreground"
+                            }`}
+                          >
+                            {ch.title}
+                          </span>
+                          {progress !== null && progress < 100 && (
+                            <div className="mt-1 h-1 bg-secondary rounded-full overflow-hidden max-w-[200px]">
+                              <div
+                                className="h-full gradient-primary rounded-full"
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0 ml-2">{ch.date}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         </div>

@@ -10,6 +10,8 @@ export interface Manga {
   status: "Ongoing" | "Completed";
   year: number;
   views: string;
+  popularity: number;
+  updatedDaysAgo: number;
 }
 
 export interface Chapter {
@@ -32,6 +34,8 @@ export const mangaList: Manga[] = [
     status: "Completed",
     year: 2018,
     views: "12.5M",
+    popularity: 98,
+    updatedDaysAgo: 12,
   },
   {
     id: "one-punch-man",
@@ -45,6 +49,8 @@ export const mangaList: Manga[] = [
     status: "Ongoing",
     year: 2012,
     views: "9.8M",
+    popularity: 91,
+    updatedDaysAgo: 2,
   },
   {
     id: "demon-slayer",
@@ -58,6 +64,8 @@ export const mangaList: Manga[] = [
     status: "Completed",
     year: 2016,
     views: "15.2M",
+    popularity: 95,
+    updatedDaysAgo: 40,
   },
   {
     id: "jujutsu-kaisen",
@@ -71,6 +79,8 @@ export const mangaList: Manga[] = [
     status: "Completed",
     year: 2018,
     views: "11.3M",
+    popularity: 93,
+    updatedDaysAgo: 7,
   },
   {
     id: "chainsaw-man",
@@ -84,6 +94,8 @@ export const mangaList: Manga[] = [
     status: "Ongoing",
     year: 2018,
     views: "8.1M",
+    popularity: 88,
+    updatedDaysAgo: 1,
   },
   {
     id: "attack-on-titan",
@@ -97,6 +109,8 @@ export const mangaList: Manga[] = [
     status: "Completed",
     year: 2009,
     views: "20.1M",
+    popularity: 99,
+    updatedDaysAgo: 90,
   },
   {
     id: "my-hero-academia",
@@ -110,6 +124,8 @@ export const mangaList: Manga[] = [
     status: "Completed",
     year: 2014,
     views: "14.7M",
+    popularity: 90,
+    updatedDaysAgo: 25,
   },
   {
     id: "tower-of-god",
@@ -123,6 +139,8 @@ export const mangaList: Manga[] = [
     status: "Ongoing",
     year: 2010,
     views: "7.4M",
+    popularity: 84,
+    updatedDaysAgo: 4,
   },
 ];
 

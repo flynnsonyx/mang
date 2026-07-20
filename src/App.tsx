@@ -10,6 +10,8 @@ import Browse from "./pages/Browse";
 import MangaDetail from "./pages/MangaDetail";
 import Reader from "./pages/Reader";
 import Bookmarks from "./pages/Bookmarks";
+import History from "./pages/History";
+import Genre from "./pages/Genre";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,9 +27,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/browse" element={<Browse />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/bookmarks" element={<Bookmarks />} />
+            <Route path="/genre/:name" element={<Genre />} />
             <Route path="/manga/:id" element={<MangaDetail />} />
             <Route path="/manga/:id/read/:chapterId" element={<Reader />} />
-            <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>
