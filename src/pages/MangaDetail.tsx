@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Star, Eye, BookOpen, Clock, User, ArrowLeft, CheckCircle2 } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import BookmarkButton from "@/components/BookmarkButton";
+import ReviewSection from "@/components/ReviewSection";
 import { mangaList, getChapters } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 
@@ -187,6 +188,8 @@ const MangaDetail = () => {
               })}
             </div>
           </motion.div>
+
+          <ReviewSection mangaId={manga.id} />
         </div>
       </div>
     </PageTransition>
