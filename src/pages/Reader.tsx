@@ -157,66 +157,99 @@ const Reader = () => {
     );
   }
 
+  const focusRing =
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+  const pageLabel = `Page ${currentPage + 1} of ${readerPages.length}`;
+
   return (
     <PageTransition>
       <div
         className="min-h-screen bg-background flex flex-col"
         onClick={() => setShowControls((s) => !s)}
+        role="application"
+        aria-label={`${manga.title} chapter ${chapterId} reader`}
       >
+        {/* Screen-reader-only live region announcing page changes */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {pageLabel}
+        </div>
+
+        {/* Skip link for keyboard users */}
+        <a
+          href="#reader-content"
+          className={`sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:font-semibold ${focusRing}`}
+        >
+          Skip to chapter content
+        </a>
+
         {/* Top bar */}
         <AnimatePresence>
           {showControls && (
-            <motion.div
+            <motion.header
               initial={{ y: -60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -60, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30 px-4 h-14 flex items-center justify-between gap-3"
               onClick={(e) => e.stopPropagation()}
+              aria-label="Reader top toolbar"
             >
               <Link
                 to={`/manga/${id}`}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0"
+                aria-label={`Back to ${manga.title} details`}
+                className={`flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0 rounded-md px-1 ${focusRing}`}
               >
-                <ChevronLeft className="w-4 h-4 shrink-0" />
+                <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline truncate">{manga.title}</span>
               </Link>
-              <span className="text-sm font-medium shrink-0">Ch. {chapterId}</span>
+              <span className="text-sm font-medium shrink-0" aria-label={`Chapter ${chapterId}`}>
+                Ch. {chapterId}
+              </span>
               <div className="flex items-center gap-1 shrink-0">
-                <span className="text-xs text-muted-foreground mr-2 hidden sm:inline">
+                <span className="text-xs text-muted-foreground mr-2 hidden sm:inline" aria-hidden="true">
                   {currentPage + 1} / {readerPages.length}
                 </span>
                 <button
                   onClick={switchMode}
-                  aria-label="Toggle reader mode"
-                  className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                  title={mode === "paged" ? "Switch to long strip" : "Switch to paged"}
+                  aria-label={
+                    mode === "paged"
+                      ? "Switch to long-strip reader mode"
+                      : "Switch to paged reader mode"
+                  }
+                  aria-pressed={mode === "vertical"}
+                  className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${focusRing}`}
                 >
                   {mode === "paged" ? (
-                    <Rows3 className="w-4 h-4" />
+                    <Rows3 className="w-4 h-4" aria-hidden="true" />
                   ) : (
-                    <BookOpen className="w-4 h-4" />
+                    <BookOpen className="w-4 h-4" aria-hidden="true" />
                   )}
                 </button>
                 <button
                   onClick={toggleFullscreen}
-                  aria-label="Toggle fullscreen"
-                  className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  aria-pressed={isFullscreen}
+                  className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${focusRing}`}
                 >
                   {isFullscreen ? (
-                    <Minimize2 className="w-4 h-4" />
+                    <Minimize2 className="w-4 h-4" aria-hidden="true" />
                   ) : (
-                    <Maximize2 className="w-4 h-4" />
+                    <Maximize2 className="w-4 h-4" aria-hidden="true" />
                   )}
                 </button>
               </div>
-            </motion.div>
+            </motion.header>
           )}
         </AnimatePresence>
 
         {/* Reader body */}
         {mode === "paged" ? (
-          <div className="flex-1 flex items-center justify-center py-16 overflow-hidden">
+          <main
+            id="reader-content"
+            className="flex-1 flex items-center justify-center py-16 overflow-hidden"
+            aria-label="Chapter pages, paged mode"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -226,10 +259,13 @@ const Reader = () => {
                 transition={{ duration: 0.25 }}
                 className="max-h-[85vh] max-w-full overflow-auto"
                 onClick={(e) => e.stopPropagation()}
+                role="group"
+                aria-roledescription="manga page"
+                aria-label={pageLabel}
               >
                 <img
                   src={readerPages[currentPage]}
-                  alt={`Page ${currentPage + 1}`}
+                  alt={`${manga.title}, chapter ${chapterId}, page ${currentPage + 1} of ${readerPages.length}`}
                   draggable={false}
                   style={{
                     transform: `scale(${zoom})`,
@@ -240,12 +276,15 @@ const Reader = () => {
                 />
               </motion.div>
             </AnimatePresence>
-          </div>
+          </main>
         ) : (
-          <div
+          <main
+            id="reader-content"
             ref={scrollRef}
             className="flex-1 overflow-y-auto pt-16 pb-20"
             onClick={(e) => e.stopPropagation()}
+            aria-label="Chapter pages, long-strip mode"
+            tabIndex={0}
           >
             <div className="max-w-3xl mx-auto flex flex-col gap-2 px-2">
               {readerPages.map((src, i) => (
@@ -253,7 +292,7 @@ const Reader = () => {
                   key={i}
                   data-page={i}
                   src={src}
-                  alt={`Page ${i + 1}`}
+                  alt={`${manga.title}, chapter ${chapterId}, page ${i + 1} of ${readerPages.length}`}
                   loading={i > 2 ? "lazy" : "eager"}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -262,32 +301,47 @@ const Reader = () => {
                 />
               ))}
             </div>
-          </div>
+          </main>
         )}
+
+        {/* Keyboard shortcut hint for screen readers */}
+        <p className="sr-only">
+          Use left and right arrow keys to change pages. Press F for fullscreen.
+          Press Escape to exit the reader. Use plus and minus keys to zoom.
+        </p>
 
         {/* Bottom controls */}
         <AnimatePresence>
           {showControls && (
-            <motion.div
+            <motion.nav
               initial={{ y: 60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 60, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/30 px-4 h-16 flex items-center justify-center gap-4"
               onClick={(e) => e.stopPropagation()}
+              aria-label="Page navigation"
             >
               {mode === "paged" ? (
                 <>
                   <button
                     onClick={prevPage}
                     disabled={currentPage === 0}
-                    className="p-3 rounded-xl bg-secondary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 disabled:hover:bg-secondary transition-all duration-300"
+                    className={`p-3 rounded-xl bg-secondary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 disabled:hover:bg-secondary transition-all duration-300 ${focusRing}`}
                     aria-label="Previous page"
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-5 h-5" aria-hidden="true" />
                   </button>
 
-                  <div className="flex-1 max-w-xs h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="flex-1 max-w-xs h-1.5 bg-secondary rounded-full overflow-hidden"
+                    role="progressbar"
+                    aria-label="Chapter progress"
+                    aria-valuemin={0}
+                    aria-valuemax={readerPages.length}
+                    aria-valuenow={currentPage + 1}
+                    aria-valuetext={pageLabel}
+                  >
                     <motion.div
                       className="h-full gradient-primary rounded-full"
                       animate={{
@@ -300,38 +354,41 @@ const Reader = () => {
                   <button
                     onClick={nextPage}
                     disabled={currentPage === readerPages.length - 1}
-                    className="p-3 rounded-xl bg-secondary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 disabled:hover:bg-secondary transition-all duration-300"
+                    className={`p-3 rounded-xl bg-secondary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 disabled:hover:bg-secondary transition-all duration-300 ${focusRing}`}
                     aria-label="Next page"
                   >
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-5 h-5" aria-hidden="true" />
                   </button>
 
                   <div className="hidden sm:flex items-center gap-1 ml-2">
                     <button
                       onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))}
-                      className="p-2 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all"
+                      className={`p-2 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all ${focusRing}`}
                       aria-label="Zoom out"
                     >
-                      <ZoomOut className="w-4 h-4" />
+                      <ZoomOut className="w-4 h-4" aria-hidden="true" />
                     </button>
-                    <span className="text-xs text-muted-foreground w-10 text-center font-mono">
+                    <span
+                      className="text-xs text-muted-foreground w-10 text-center font-mono"
+                      aria-label={`Zoom ${Math.round(zoom * 100)} percent`}
+                    >
                       {Math.round(zoom * 100)}%
                     </span>
                     <button
                       onClick={() => setZoom((z) => Math.min(3, z + 0.25))}
-                      className="p-2 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all"
+                      className={`p-2 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all ${focusRing}`}
                       aria-label="Zoom in"
                     >
-                      <ZoomIn className="w-4 h-4" />
+                      <ZoomIn className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground" aria-live="polite">
                   Long-strip mode · scroll to read · {currentPage + 1} / {readerPages.length}
                 </div>
               )}
-            </motion.div>
+            </motion.nav>
           )}
         </AnimatePresence>
       </div>
