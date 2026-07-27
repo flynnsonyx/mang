@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Search, Home, Compass, Bookmark, History, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import SearchDialog from "@/components/SearchDialog";
+import AuthButton from "@/components/AuthButton";
+
 
 const Navbar = () => {
   const location = useLocation();
@@ -80,7 +82,9 @@ const Navbar = () => {
             >
               <Search className="w-5 h-5" />
             </button>
+            <AuthButton className="ml-2" />
           </div>
+
 
           {/* Mobile buttons */}
           <div className="flex md:hidden items-center gap-1">
@@ -155,9 +159,11 @@ const Navbar = () => {
                   );
                 })}
               </nav>
-              <div className="p-4 text-xs text-muted-foreground border-t border-border/30">
-                Swipe right to close
+              <div className="p-4 border-t border-border/30 space-y-3">
+                <AuthButton className="w-full justify-center" />
+                <p className="text-xs text-muted-foreground">Swipe right to close</p>
               </div>
+
             </motion.aside>
           </>
         )}

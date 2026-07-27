@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          manga_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          manga_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          manga_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reading_history: {
+        Row: {
+          chapter_id: number
+          created_at: string
+          id: string
+          last_page: number | null
+          manga_id: string
+          read_at: string
+          total_pages: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: number
+          created_at?: string
+          id?: string
+          last_page?: number | null
+          manga_id: string
+          read_at?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: number
+          created_at?: string
+          id?: string
+          last_page?: number | null
+          manga_id?: string
+          read_at?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string
@@ -22,6 +82,7 @@ export type Database = {
           id: string
           manga_id: string
           rating: number
+          user_id: string | null
         }
         Insert: {
           comment: string
@@ -30,6 +91,7 @@ export type Database = {
           id?: string
           manga_id: string
           rating: number
+          user_id?: string | null
         }
         Update: {
           comment?: string
@@ -38,6 +100,7 @@ export type Database = {
           id?: string
           manga_id?: string
           rating?: number
+          user_id?: string | null
         }
         Relationships: []
       }
