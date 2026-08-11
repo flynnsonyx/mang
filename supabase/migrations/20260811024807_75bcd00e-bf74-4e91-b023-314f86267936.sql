@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_review_helpful_count() FROM PUBLIC, anon, authenticated;
