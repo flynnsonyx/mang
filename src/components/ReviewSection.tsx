@@ -911,9 +911,8 @@ const ReviewSection = ({ mangaId }: Props) => {
                         {hidden ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              setRevealed((prev) => new Set(prev).add(r.id))
-                            }
+                            onClick={() => toggleRevealed(r.id)}
+                            aria-expanded={false}
                             className="w-full text-left text-sm text-muted-foreground italic px-3 py-4 rounded-lg bg-secondary/40 border border-border/30 hover:text-foreground transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           >
                             This review is tagged
@@ -930,10 +929,24 @@ const ReviewSection = ({ mangaId }: Props) => {
                             . Tap to reveal.
                           </button>
                         ) : (
-                          <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">
-                            {r.comment}
-                          </p>
+                          <>
+                            <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">
+                              {r.comment}
+                            </p>
+                            {tagged && !alwaysReveal && (
+                              <button
+                                type="button"
+                                onClick={() => toggleRevealed(r.id)}
+                                aria-expanded={true}
+                                className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                              >
+                                <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
+                                Hide again
+                              </button>
+                            )}
+                          </>
                         )}
+
 
                         <div className="mt-3 flex items-center">
                           <button
