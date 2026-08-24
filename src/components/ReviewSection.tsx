@@ -11,6 +11,7 @@ import {
   Check,
   ArrowUpDown,
   ThumbsUp,
+  Eye,
   EyeOff,
   AlertTriangle,
   ChevronDown,
