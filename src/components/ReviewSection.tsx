@@ -11,6 +11,7 @@ import {
   Check,
   ArrowUpDown,
   ThumbsUp,
+  Eye,
   EyeOff,
   AlertTriangle,
   ChevronDown,
@@ -33,6 +34,8 @@ interface Review {
 }
 
 const NAME_KEY = "yuvience-review-name";
+const SPOILER_PREF_KEY = "yuvience-reveal-spoilers";
+const REVEALED_KEY = "yuvience-revealed-reviews";
 const PAGE_SIZE = 5;
 
 const WARNING_TAGS = [
@@ -184,7 +187,37 @@ const ReviewSection = ({ mangaId }: Props) => {
 
   const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
   const [votingId, setVotingId] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  const [alwaysReveal, setAlwaysReveal] = useState(
+    () => localStorage.getItem(SPOILER_PREF_KEY) === "1"
+  );
+  const [revealed, setRevealed] = useState<Set<string>>(() => {
+    try {
+      const raw = sessionStorage.getItem(REVEALED_KEY);
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SPOILER_PREF_KEY, alwaysReveal ? "1" : "0");
+  }, [alwaysReveal]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(REVEALED_KEY, JSON.stringify([...revealed]));
+    } catch {
+      /* ignore */
+    }
+  }, [revealed]);
+
+  const toggleRevealed = (id: string) =>
+    setRevealed((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
   const [counts, setCounts] = useState<Record<number, number>>({
     1: 0,
     2: 0,
@@ -429,6 +462,11 @@ const ReviewSection = ({ mangaId }: Props) => {
           .insert({ review_id: r.id, user_id: user.id });
     setVotingId(null);
     if (error) {
+      // Unique constraint (review_id, user_id): the vote already exists.
+      if ((error as { code?: string }).code === "23505") {
+        setMyVotes((prev) => new Set(prev).add(r.id));
+        return;
+      }
       toast.error("Could not update your vote");
       return;
     }
@@ -640,8 +678,31 @@ const ReviewSection = ({ mangaId }: Props) => {
               My reviews
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setAlwaysReveal((v) => !v);
+              if (alwaysReveal) setRevealed(new Set());
+            }}
+            aria-pressed={alwaysReveal}
+            title="Remembered on this device while you browse"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              alwaysReveal
+                ? "bg-primary/20 text-primary border-primary/30"
+                : "border-border/40 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {alwaysReveal ? (
+              <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+            ) : (
+              <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
+            )}
+            {alwaysReveal ? "Spoilers shown" : "Spoilers hidden"}
+          </button>
         </div>
       )}
+
 
       {loading ? (
         <div
@@ -666,9 +727,9 @@ const ReviewSection = ({ mangaId }: Props) => {
                 const mine = !!user && r.user_id === user.id;
                 const editing = editingId === r.id;
                 const voted = myVotes.has(r.id);
-                const hidden =
-                  (r.has_spoiler || (r.content_warnings?.length ?? 0) > 0) &&
-                  !revealed.has(r.id);
+                const tagged =
+                  r.has_spoiler || (r.content_warnings?.length ?? 0) > 0;
+                const hidden = tagged && !alwaysReveal && !revealed.has(r.id);
                 return (
                   <motion.li
                     key={r.id}
@@ -851,9 +912,8 @@ const ReviewSection = ({ mangaId }: Props) => {
                         {hidden ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              setRevealed((prev) => new Set(prev).add(r.id))
-                            }
+                            onClick={() => toggleRevealed(r.id)}
+                            aria-expanded={false}
                             className="w-full text-left text-sm text-muted-foreground italic px-3 py-4 rounded-lg bg-secondary/40 border border-border/30 hover:text-foreground transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           >
                             This review is tagged
@@ -870,10 +930,24 @@ const ReviewSection = ({ mangaId }: Props) => {
                             . Tap to reveal.
                           </button>
                         ) : (
-                          <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">
-                            {r.comment}
-                          </p>
+                          <>
+                            <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">
+                              {r.comment}
+                            </p>
+                            {tagged && !alwaysReveal && (
+                              <button
+                                type="button"
+                                onClick={() => toggleRevealed(r.id)}
+                                aria-expanded={true}
+                                className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                              >
+                                <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
+                                Hide again
+                              </button>
+                            )}
+                          </>
                         )}
+
 
                         <div className="mt-3 flex items-center">
                           <button
