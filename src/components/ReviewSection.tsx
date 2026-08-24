@@ -217,6 +217,8 @@ const ReviewSection = ({ mangaId }: Props) => {
       return next;
     });
 
+  const [counts, setCounts] = useState<Record<number, number>>({
+    1: 0,
     2: 0,
     3: 0,
     4: 0,
