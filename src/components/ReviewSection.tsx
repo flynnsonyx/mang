@@ -33,6 +33,8 @@ interface Review {
 }
 
 const NAME_KEY = "yuvience-review-name";
+const SPOILER_PREF_KEY = "yuvience-reveal-spoilers";
+const REVEALED_KEY = "yuvience-revealed-reviews";
 const PAGE_SIZE = 5;
 
 const WARNING_TAGS = [
