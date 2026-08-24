@@ -726,9 +726,9 @@ const ReviewSection = ({ mangaId }: Props) => {
                 const mine = !!user && r.user_id === user.id;
                 const editing = editingId === r.id;
                 const voted = myVotes.has(r.id);
-                const hidden =
-                  (r.has_spoiler || (r.content_warnings?.length ?? 0) > 0) &&
-                  !revealed.has(r.id);
+                const tagged =
+                  r.has_spoiler || (r.content_warnings?.length ?? 0) > 0;
+                const hidden = tagged && !alwaysReveal && !revealed.has(r.id);
                 return (
                   <motion.li
                     key={r.id}
