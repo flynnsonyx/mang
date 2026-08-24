@@ -677,8 +677,31 @@ const ReviewSection = ({ mangaId }: Props) => {
               My reviews
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setAlwaysReveal((v) => !v);
+              if (alwaysReveal) setRevealed(new Set());
+            }}
+            aria-pressed={alwaysReveal}
+            title="Remembered on this device while you browse"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              alwaysReveal
+                ? "bg-primary/20 text-primary border-primary/30"
+                : "border-border/40 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {alwaysReveal ? (
+              <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+            ) : (
+              <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
+            )}
+            {alwaysReveal ? "Spoilers shown" : "Spoilers hidden"}
+          </button>
         </div>
       )}
+
 
       {loading ? (
         <div
