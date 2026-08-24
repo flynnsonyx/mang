@@ -461,6 +461,11 @@ const ReviewSection = ({ mangaId }: Props) => {
           .insert({ review_id: r.id, user_id: user.id });
     setVotingId(null);
     if (error) {
+      // Unique constraint (review_id, user_id): the vote already exists.
+      if ((error as { code?: string }).code === "23505") {
+        setMyVotes((prev) => new Set(prev).add(r.id));
+        return;
+      }
       toast.error("Could not update your vote");
       return;
     }
