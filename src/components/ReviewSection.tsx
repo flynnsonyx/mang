@@ -186,9 +186,37 @@ const ReviewSection = ({ mangaId }: Props) => {
 
   const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
   const [votingId, setVotingId] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [counts, setCounts] = useState<Record<number, number>>({
-    1: 0,
+  const [alwaysReveal, setAlwaysReveal] = useState(
+    () => localStorage.getItem(SPOILER_PREF_KEY) === "1"
+  );
+  const [revealed, setRevealed] = useState<Set<string>>(() => {
+    try {
+      const raw = sessionStorage.getItem(REVEALED_KEY);
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SPOILER_PREF_KEY, alwaysReveal ? "1" : "0");
+  }, [alwaysReveal]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(REVEALED_KEY, JSON.stringify([...revealed]));
+    } catch {
+      /* ignore */
+    }
+  }, [revealed]);
+
+  const toggleRevealed = (id: string) =>
+    setRevealed((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
     2: 0,
     3: 0,
     4: 0,
