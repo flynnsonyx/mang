@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import SwipeRecommendations from "@/components/SwipeRecommendations";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import MangaDetail from "./pages/MangaDetail";
@@ -23,6 +24,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Navbar />
+        <SwipeRecommendations />
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Index />} />
