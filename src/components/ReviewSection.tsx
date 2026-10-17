@@ -204,6 +204,12 @@ const ReviewSection = ({ mangaId }: Props) => {
   }, [alwaysReveal]);
 
   useEffect(() => {
+    const syncPreference = () => setAlwaysReveal(localStorage.getItem(SPOILER_PREF_KEY) === "1");
+    window.addEventListener("yuvience-spoiler-preference-changed", syncPreference);
+    return () => window.removeEventListener("yuvience-spoiler-preference-changed", syncPreference);
+  }, []);
+
+  useEffect(() => {
     try {
       sessionStorage.setItem(REVEALED_KEY, JSON.stringify([...revealed]));
     } catch {

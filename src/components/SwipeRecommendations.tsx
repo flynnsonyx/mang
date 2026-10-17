@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Star, X, ChevronLeft } from "lucide-react";
+import { Sparkles, Star, X, ChevronLeft, Settings, ArrowLeft, BookOpen, Rows3 } from "lucide-react";
 import { mangaList } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 const EDGE = 28; // px from right edge where a swipe can start
 const HINT_KEY = "yuvience-swipe-hint-seen";
 
 const SwipeRecommendations = () => {
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"recommendations" | "settings">("recommendations");
+  const [readerMode, setReaderMode] = useState(() => localStorage.getItem("yuvience-reader-mode") || "paged");
+  const [revealSpoilers, setRevealSpoilers] = useState(() => localStorage.getItem("yuvience-reveal-spoilers") === "1");
   const [hint, setHint] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
   const location = useLocation();
@@ -32,7 +37,31 @@ const SwipeRecommendations = () => {
     };
   }, [getRecentlyRead]);
 
-  useEffect(() => setOpen(false), [location.pathname]);
+  useEffect(() => {
+    setOpen(false);
+    setView("recommendations");
+  }, [location.pathname]);
+
+  const openRecommendations = () => {
+    setView("recommendations");
+    setOpen(true);
+    setHint(false);
+  };
+
+  useEffect(() => {
+    if (!open || view !== "settings") return;
+    setRevealSpoilers(localStorage.getItem("yuvience-reveal-spoilers") === "1");
+    setReaderMode(localStorage.getItem("yuvience-reader-mode") || "paged");
+  }, [open, view]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   useEffect(() => {
     if (inReader) return;
@@ -49,15 +78,18 @@ const SwipeRecommendations = () => {
     if (inReader) return;
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (window.innerWidth >= 768) return;
-      start.current = t.clientX > window.innerWidth - EDGE ? { x: t.clientX, y: t.clientY } : null;
+      if (!t || window.innerWidth >= 768) return;
+      const insidePanel = e.target instanceof Element && !!e.target.closest('[data-swipe-preview]');
+      start.current = (open ? insidePanel : t.clientX > window.innerWidth - EDGE) ? { x: t.clientX, y: t.clientY } : null;
     };
     const onEnd = (e: TouchEvent) => {
       if (!start.current) return;
       const t = e.changedTouches[0];
+      if (!t) { start.current = null; return; }
       const dx = start.current.x - t.clientX;
       const dy = Math.abs(start.current.y - t.clientY);
       if (dx > 50 && dx > dy) {
+        setView(open ? "settings" : "recommendations");
         setOpen(true);
         setHint(false);
       }
@@ -69,7 +101,7 @@ const SwipeRecommendations = () => {
       window.removeEventListener("touchstart", onStart);
       window.removeEventListener("touchend", onEnd);
     };
-  }, [inReader]);
+  }, [inReader, open]);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > 80 || info.velocity.x > 500) setOpen(false);
@@ -80,13 +112,12 @@ const SwipeRecommendations = () => {
   return (
     <>
       {/* Edge tab / hint */}
-      <motion.button
+      <Button
+        variant="ghost"
         type="button"
         aria-label="Open recommendations"
-        onClick={() => setOpen(true)}
+        onClick={openRecommendations}
         className="md:hidden fixed right-0 top-1/2 -translate-y-1/2 z-40 flex items-center gap-1 rounded-l-xl glass border border-primary/30 border-r-0 py-3 pl-1.5 pr-1 text-primary shadow-lg"
-        animate={hint ? { x: [0, -10, 0] } : { x: 0 }}
-        transition={hint ? { repeat: Infinity, duration: 1.2 } : {}}
       >
         <ChevronLeft className="w-4 h-4" />
         <AnimatePresence>
@@ -101,7 +132,7 @@ const SwipeRecommendations = () => {
             </motion.span>
           )}
         </AnimatePresence>
-      </motion.button>
+      </Button>
 
       <AnimatePresence>
         {open && (
@@ -115,7 +146,9 @@ const SwipeRecommendations = () => {
             />
             <motion.aside
               role="dialog"
-              aria-label="Recommendations"
+              aria-modal="true"
+              aria-label={view === "settings" ? "Settings" : "Recommendations"}
+              data-swipe-preview
               className="fixed right-0 top-0 bottom-0 z-50 w-[85%] max-w-sm glass border-l border-primary/30 flex flex-col"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -128,18 +161,54 @@ const SwipeRecommendations = () => {
             >
               <div className="flex items-center justify-between p-4 border-b border-border/50">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles className="w-5 h-5 text-primary shrink-0" />
-                  <h2 className="font-display font-bold gradient-text truncate">{title}</h2>
+                  {view === "settings" ? <Settings className="w-5 h-5 text-primary shrink-0" /> : <Sparkles className="w-5 h-5 text-primary shrink-0" />}
+                  <h2 className="font-display font-bold gradient-text truncate">{view === "settings" ? "Settings" : title}</h2>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={view === "settings" ? "Back to recommendations" : "Open settings"}
+                  onClick={() => setView(view === "settings" ? "recommendations" : "settings")}
+                >
+                  {view === "settings" ? <ArrowLeft /> : <Settings />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   type="button"
-                  aria-label="Close recommendations"
+                  aria-label={view === "settings" ? "Close settings" : "Close recommendations"}
                   onClick={() => setOpen(false)}
                   className="p-2 rounded-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
+              {view === "settings" ? (
+                <motion.div key="settings" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto p-4 space-y-8">
+                  <section className="space-y-3">
+                    <h3 className="text-sm font-semibold">Reading mode</h3>
+                    <div className="grid grid-cols-2 gap-2" role="group" aria-label="Default reading mode">
+                      {(["paged", "vertical"] as const).map((mode) => (
+                        <Button key={mode} variant={readerMode === mode ? "default" : "secondary"} aria-pressed={readerMode === mode} onClick={() => {
+                          setReaderMode(mode);
+                          localStorage.setItem("yuvience-reader-mode", mode);
+                        }}>
+                          {mode === "paged" ? <BookOpen /> : <Rows3 />}
+                          {mode === "paged" ? "Pages" : "Scroll"}
+                        </Button>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="flex items-center justify-between gap-4">
+                    <label htmlFor="preview-spoilers" className="text-sm font-semibold">Show spoilers</label>
+                    <Switch id="preview-spoilers" checked={revealSpoilers} onCheckedChange={(checked) => {
+                      setRevealSpoilers(checked);
+                      localStorage.setItem("yuvience-reveal-spoilers", checked ? "1" : "0");
+                      window.dispatchEvent(new Event("yuvience-spoiler-preference-changed"));
+                    }} />
+                  </section>
+                </motion.div>
+              ) : (
               <ul className="flex-1 overflow-y-auto p-3 space-y-3">
                 {items.map((m, i) => (
                   <motion.li
@@ -170,7 +239,7 @@ const SwipeRecommendations = () => {
                   </motion.li>
                 ))}
               </ul>
-              <p className="text-center text-xs text-muted-foreground p-3">Swipe right to close</p>
+              )}
             </motion.aside>
           </>
         )}
