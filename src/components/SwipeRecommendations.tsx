@@ -93,22 +93,6 @@ const SwipeRecommendations = () => {
 
   return (
     <>
-      {/* First-visit hint (transient, non-interactive) */}
-      <AnimatePresence>
-        {hint && (
-          <motion.div
-            aria-hidden="true"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="md:hidden fixed right-3 top-1/2 -translate-y-1/2 z-40 pointer-events-none flex items-center gap-1.5 rounded-full glass border border-primary/30 py-1.5 pl-1 pr-2.5 text-primary shadow-lg"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-xs font-medium whitespace-nowrap">Swipe for picks</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {open && (
           <>
