@@ -55,8 +55,7 @@ const SwipeRecommendations = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  useEffect(() => {
-    if (inReader) return;
+
 
   useEffect(() => {
     if (inReader) return;
