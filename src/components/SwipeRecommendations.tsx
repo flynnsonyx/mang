@@ -74,7 +74,6 @@ const SwipeRecommendations = () => {
       if (dx > 50 && dx > dy) {
         setView(open ? "settings" : "recommendations");
         setOpen(true);
-        setHint(false);
       }
       start.current = null;
     };
