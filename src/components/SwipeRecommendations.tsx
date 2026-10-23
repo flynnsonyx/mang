@@ -1,21 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Star, X, ChevronLeft, Settings, ArrowLeft, BookOpen, Rows3 } from "lucide-react";
+import { Sparkles, Star, X, Settings, ArrowLeft, BookOpen, Rows3 } from "lucide-react";
 import { mangaList } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
 const EDGE = 28; // px from right edge where a swipe can start
-const HINT_KEY = "yuvience-swipe-hint-seen";
 
 const SwipeRecommendations = () => {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"recommendations" | "settings">("recommendations");
   const [readerMode, setReaderMode] = useState(() => localStorage.getItem("yuvience-reader-mode") || "paged");
   const [revealSpoilers, setRevealSpoilers] = useState(() => localStorage.getItem("yuvience-reveal-spoilers") === "1");
-  const [hint, setHint] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
   const location = useLocation();
   const { getRecentlyRead } = useReadingHistory();
@@ -57,16 +55,7 @@ const SwipeRecommendations = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  useEffect(() => {
-    if (inReader) return;
-    const mobile = window.matchMedia("(max-width: 767px)");
-    if (mobile.matches && !localStorage.getItem(HINT_KEY)) {
-      setHint(true);
-      const t = setTimeout(() => setHint(false), 4500);
-      localStorage.setItem(HINT_KEY, "1");
-      return () => clearTimeout(t);
-    }
-  }, [inReader]);
+
 
   useEffect(() => {
     if (inReader) return;
@@ -85,7 +74,6 @@ const SwipeRecommendations = () => {
       if (dx > 50 && dx > dy) {
         setView(open ? "settings" : "recommendations");
         setOpen(true);
-        setHint(false);
       }
       start.current = null;
     };
@@ -105,22 +93,6 @@ const SwipeRecommendations = () => {
 
   return (
     <>
-      {/* First-visit hint (transient, non-interactive) */}
-      <AnimatePresence>
-        {hint && (
-          <motion.div
-            aria-hidden="true"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="md:hidden fixed right-3 top-1/2 -translate-y-1/2 z-40 pointer-events-none flex items-center gap-1.5 rounded-full glass border border-primary/30 py-1.5 pl-1 pr-2.5 text-primary shadow-lg"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-xs font-medium whitespace-nowrap">Swipe for picks</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {open && (
           <>
