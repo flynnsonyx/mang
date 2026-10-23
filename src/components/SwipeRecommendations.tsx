@@ -42,12 +42,6 @@ const SwipeRecommendations = () => {
     setView("recommendations");
   }, [location.pathname]);
 
-  const openRecommendations = () => {
-    setView("recommendations");
-    setOpen(true);
-    setHint(false);
-  };
-
   useEffect(() => {
     if (!open || view !== "settings") return;
     setRevealSpoilers(localStorage.getItem("yuvience-reveal-spoilers") === "1");
