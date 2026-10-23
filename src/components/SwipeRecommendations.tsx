@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Star, X, ChevronLeft, Settings, ArrowLeft, BookOpen, Rows3 } from "lucide-react";
+import { Sparkles, Star, X, Settings, ArrowLeft, BookOpen, Rows3 } from "lucide-react";
 import { mangaList } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
 const EDGE = 28; // px from right edge where a swipe can start
-const HINT_KEY = "yuvience-swipe-hint-seen";
 
 const SwipeRecommendations = () => {
   const [open, setOpen] = useState(false);
