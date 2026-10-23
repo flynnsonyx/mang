@@ -42,12 +42,6 @@ const SwipeRecommendations = () => {
     setView("recommendations");
   }, [location.pathname]);
 
-  const openRecommendations = () => {
-    setView("recommendations");
-    setOpen(true);
-    setHint(false);
-  };
-
   useEffect(() => {
     if (!open || view !== "settings") return;
     setRevealSpoilers(localStorage.getItem("yuvience-reveal-spoilers") === "1");
@@ -111,28 +105,21 @@ const SwipeRecommendations = () => {
 
   return (
     <>
-      {/* Edge tab / hint */}
-      <Button
-        variant="ghost"
-        type="button"
-        aria-label="Open recommendations"
-        onClick={openRecommendations}
-        className="md:hidden fixed right-0 top-1/2 -translate-y-1/2 z-40 flex items-center gap-1 rounded-l-xl glass border border-primary/30 border-r-0 py-3 pl-1.5 pr-1 text-primary shadow-lg"
-      >
-        <ChevronLeft className="w-4 h-4" />
-        <AnimatePresence>
-          {hint && (
-            <motion.span
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: "auto", opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              className="text-xs font-medium whitespace-nowrap overflow-hidden pr-1"
-            >
-              Swipe for picks
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </Button>
+      {/* First-visit hint (transient, non-interactive) */}
+      <AnimatePresence>
+        {hint && (
+          <motion.div
+            aria-hidden="true"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="md:hidden fixed right-3 top-1/2 -translate-y-1/2 z-40 pointer-events-none flex items-center gap-1.5 rounded-full glass border border-primary/30 py-1.5 pl-1 pr-2.5 text-primary shadow-lg"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs font-medium whitespace-nowrap">Swipe for picks</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {open && (
