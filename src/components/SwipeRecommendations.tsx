@@ -14,7 +14,6 @@ const SwipeRecommendations = () => {
   const [view, setView] = useState<"recommendations" | "settings">("recommendations");
   const [readerMode, setReaderMode] = useState(() => localStorage.getItem("yuvience-reader-mode") || "paged");
   const [revealSpoilers, setRevealSpoilers] = useState(() => localStorage.getItem("yuvience-reveal-spoilers") === "1");
-  const [hint, setHint] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
   const location = useLocation();
   const { getRecentlyRead } = useReadingHistory();
@@ -58,14 +57,6 @@ const SwipeRecommendations = () => {
 
   useEffect(() => {
     if (inReader) return;
-    const mobile = window.matchMedia("(max-width: 767px)");
-    if (mobile.matches && !localStorage.getItem(HINT_KEY)) {
-      setHint(true);
-      const t = setTimeout(() => setHint(false), 4500);
-      localStorage.setItem(HINT_KEY, "1");
-      return () => clearTimeout(t);
-    }
-  }, [inReader]);
 
   useEffect(() => {
     if (inReader) return;
