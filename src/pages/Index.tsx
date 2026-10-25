@@ -145,11 +145,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {trending.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={trending} duration={34} />
           </motion.div>
         </section>
 
@@ -174,11 +170,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {recentlyUpdated.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={recentlyUpdated} duration={40} />
           </motion.div>
         </section>
 
@@ -202,11 +194,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {popular.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={popular} duration={37} />
           </motion.div>
         </section>
 
