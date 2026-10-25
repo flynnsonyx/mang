@@ -2,18 +2,19 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Play, BookOpen, TrendingUp, Clock, Sparkles } from "lucide-react";
 import MangaCard from "@/components/MangaCard";
+import Marquee3D from "@/components/Marquee3D";
 import PageTransition from "@/components/PageTransition";
 import { mangaList } from "@/data/manga";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 const Index = () => {
   const featured = mangaList[0];
-  const trending = [...mangaList].sort((a, b) => b.popularity - a.popularity).slice(0, 4);
-  const popular = [...mangaList].sort((a, b) => b.rating - a.rating).slice(0, 6);
+  const trending = [...mangaList].sort((a, b) => b.popularity - a.popularity).slice(0, 8);
+  const popular = [...mangaList].sort((a, b) => b.rating - a.rating).slice(0, 8);
   const recentlyUpdated = [...mangaList]
     .filter((m) => m.status === "Ongoing")
     .sort((a, b) => a.updatedDaysAgo - b.updatedDaysAgo)
-    .slice(0, 6);
+    .slice(0, 8);
 
   const { getRecentlyRead } = useReadingHistory();
   const recent = getRecentlyRead(1)[0];
@@ -144,11 +145,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {trending.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={trending} duration={34} />
           </motion.div>
         </section>
 
@@ -173,11 +170,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {recentlyUpdated.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={recentlyUpdated} duration={40} />
           </motion.div>
         </section>
 
@@ -201,11 +194,7 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {popular.map((manga, i) => (
-                <MangaCard key={manga.id} manga={manga} index={i} />
-              ))}
-            </div>
+            <Marquee3D items={popular} duration={37} />
           </motion.div>
         </section>
 
