@@ -69,11 +69,14 @@ const MarqueeRow = ({
 };
 
 const Marquee3D = ({ items, duration = 36 }: Marquee3DProps) => {
+  if (items.length === 0) return null;
+  const rotate = (arr: Manga[], n: number) => arr.map((_, i) => arr[(i + n) % arr.length]);
+  const cycle = (arr: Manga[], count: number) =>
+    Array.from({ length: count }, (_, i) => arr[i % arr.length]);
   const mid = Math.ceil(items.length / 2);
-  const rowA = items.slice(0, mid);
-  const rowB = items.slice(mid);
-  // Keep both rows populated even with odd-sized inputs.
-  if (rowB.length === 0 && rowA.length > 0) rowB.push(...rowA);
+  // Keep both rows full and varied even when a section has few titles.
+  const rowA = cycle(items, Math.max(4, mid));
+  const rowB = cycle(rotate(items, mid), Math.max(4, items.length - mid));
 
   return (
     <div className="relative py-2">
