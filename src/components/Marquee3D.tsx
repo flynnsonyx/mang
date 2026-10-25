@@ -41,7 +41,7 @@ const MarqueeRow = ({
               tabIndex={isCopy ? -1 : 0}
               className="marquee-card group shrink-0 block w-32 sm:w-40"
             >
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden glass glow-sm group-hover:glow-md transition-shadow">
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-card/40 shadow-xl shadow-black/40 glow-sm group-hover:glow-md transition-shadow">
                 <img
                   src={manga.cover}
                   alt={manga.title}
