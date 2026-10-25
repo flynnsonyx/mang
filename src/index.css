@@ -95,6 +95,52 @@
   }
 }
 
+/* 3D marquee (Trending / Recently Updated / Top Rated) */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@layer utilities {
+  .marquee3d {
+    perspective: 1200px;
+    overflow: hidden;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 1.25rem;
+    width: max-content;
+    will-change: transform;
+    animation: marquee-scroll var(--marquee-duration, 36s) linear infinite;
+  }
+  .marquee-track.reverse {
+    animation-direction: reverse;
+  }
+  .marquee3d:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  .marquee-card {
+    transform: perspective(900px) rotateY(-16deg) rotateX(5deg);
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+  }
+  .marquee-card:hover {
+    transform: perspective(900px) rotateY(0deg) rotateX(0deg) translateZ(36px) scale(1.06);
+  }
+  .marquee-card.flip {
+    transform: perspective(900px) rotateY(16deg) rotateX(5deg);
+  }
+  .marquee-card.flip:hover {
+    transform: perspective(900px) rotateY(0deg) rotateX(0deg) translateZ(36px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
