@@ -108,6 +108,7 @@
   }
   .marquee-track {
     display: flex;
+    padding-block: 1rem 0.5rem;
     width: max-content;
     will-change: transform;
     animation: marquee-scroll var(--marquee-duration, 36s) linear infinite;
