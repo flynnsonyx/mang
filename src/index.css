@@ -108,11 +108,14 @@
   }
   .marquee-track {
     display: flex;
-    gap: 2.25rem;
-    padding-block: 1rem 0.5rem;
     width: max-content;
     will-change: transform;
     animation: marquee-scroll var(--marquee-duration, 36s) linear infinite;
+  }
+  /* Per-card margin (instead of gap) keeps every copy evenly spaced, so the
+     -50% wrap point lands exactly on a copy boundary — a seamless loop. */
+  .marquee-track > * {
+    margin-right: 2.25rem;
   }
   .marquee-track.reverse {
     animation-direction: reverse;
